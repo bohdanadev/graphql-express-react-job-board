@@ -4,6 +4,20 @@ import { GRAPHQL_URL } from "../../keys.js";
 console.log("GQL:", GRAPHQL_URL);
 const client = new GraphQLClient(GRAPHQL_URL);
 
+export async function createJob({ title, description }) {
+  const mutation = gql`
+    mutation CreateJob($input: CreateJobInput!) {
+      job: createJob(input: $input) {
+        id
+      }
+    }
+  `;
+  const { job } = await client.request(mutation, {
+    input: { title, description },
+  });
+  return job;
+}
+
 export async function getCompany(id) {
   const query = gql`
     query CompanyById($id: ID!) {
