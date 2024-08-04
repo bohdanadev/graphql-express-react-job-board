@@ -5,9 +5,10 @@ import * as dotenv from "dotenv";
 import express from "express";
 import { readFile } from "node:fs/promises";
 import { authMiddleware, handleLogin } from "./auth.js";
-import { resolvers } from "./resolvers.js";
 import { getUser } from "./db/users.js";
 import { createCompanyLoader } from "./db/companies.js";
+import { companyResolvers } from "./resolvers/company/company.resolvers.js";
+import { jobResolvers } from "./resolvers/job/job.resolvers.js";
 
 dotenv.config();
 const port = process.env.PORT;
@@ -31,10 +32,26 @@ async function getContext({ req }) {
 
 const apolloServer = new ApolloServer({
   typeDefs,
-  resolvers,
+  resolvers: {
+    Query: {
+      ...companyResolvers.Query,
+      ...jobResolvers.Query,
+    },
+    Mutation: {
+      ...jobResolvers.Mutation,
+    },
+    Job: {
+      ...jobResolvers.Job,
+    },
+    Company: {
+      ...companyResolvers.Company,
+    },
+  },
 });
 await apolloServer.start();
+
 app.use("/graphql", apolloMiddleware(apolloServer, { context: getContext }));
+
 app.listen({ port }, () => {
   console.log(`Server running on port ${port}`);
   console.log(`GraphQL endpoint: http://localhost:${port}/graphql`);

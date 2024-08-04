@@ -1,24 +1,16 @@
-import { GraphQLError } from "graphql";
-import { getCompany } from "./db/companies.js";
 import {
   countJobs,
   createJob,
   deleteJob,
   getJob,
   getJobs,
-  getJobsByCompany,
   updateJob,
-} from "./db/jobs.js";
+} from "../../db/jobs";
+import { dateFormat } from "../../utils/date-format";
+import { notFoundError, unauthorizedError } from "../../utils/error-handlers";
 
-export const resolvers = {
+export const jobResolvers = {
   Query: {
-    company: async (_root, { id }) => {
-      const company = await getCompany(id);
-      if (!company) {
-        throw notFoundError("No Company found with id " + id);
-      }
-      return company;
-    },
     job: async (_root, { id }) => {
       const job = await getJob(id);
       if (!job) {
@@ -75,24 +67,6 @@ export const resolvers = {
     company: (job, _args, { companyLoader }) => {
       return companyLoader.load(job.companyId);
     },
-    date: (job) => toIsoDate(job.createdAt),
-  },
-  Company: {
-    jobs: (company) => getJobsByCompany(company.id),
+    date: (job) => dateFormat(job.createdAt),
   },
 };
-
-function notFoundError(message) {
-  return new GraphQLError(message, {
-    extensions: { code: "NOT_FOUND" },
-  });
-}
-
-function unauthorizedError(message) {
-  return new GraphQLError(message, {
-    extensions: { code: "UNAUTHORIZED" },
-  });
-}
-function toIsoDate(value) {
-  return value.slice(0, "yyyy-mm-dd".length);
-}

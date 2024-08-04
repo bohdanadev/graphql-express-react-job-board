@@ -43,14 +43,14 @@ For the backend:
 
 ```bash
 cd server
-npm install
+npm ci
 ```
 
 For the frontend:
 
 ```bash
 cd client
-npm install
+npm ci
 ```
 
 3. Setup Configuration Files
